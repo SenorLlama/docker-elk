@@ -15,25 +15,20 @@ RUN add-apt-repository -y ppa:webupd8team/java && apt-get update && \
 
 # install elasticsearch and logstash
 RUN wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | apt-key add - && \
-	echo "deb http://packages.elastic.co/elasticsearch/2.0/debian stable main" > /etc/apt/sources.list && \
+	echo "deb http://packages.elastic.co/elasticsearch/2.x/debian stable main" > /etc/apt/sources.list && \
 	apt-get update && apt-get install -y elasticsearch && \
 	echo "deb http://packages.elasticsearch.org/logstash/2.0/debian stable main" > /etc/apt/sources.list && \
 	apt-get update && apt-get install -y logstash
 
 # install kibana
-RUN sudo groupadd -g 999 kibana && \
-	sudo useradd -u 999 -g 999 kibana && \
+RUN sudo groupadd -g 998 kibana && \
+	sudo useradd -u 998 -g 998 kibana && \
 	wget https://download.elastic.co/kibana/kibana/kibana-4.3.0-linux-x64.tar.gz && \
 	tar xvf kibana-*.tar.gz && \
 	sudo mkdir -p /opt/kibana && \
-	sudo cp -R ~/kibana-4*/* /opt/kibana/ && \
+	sudo mv kibana-4*/* /opt/kibana/ && \
 	sudo chown -R kibana: /opt/kibana && \
-	cd /etc/init.d && sudo curl -o kibana https://gist.githubusercontent.com/thisismitch/8b15ac909aed214ad04a/raw/fc5025c3fc499ad8262aff34ba7fde8c87ead7c0/kibana-4.x-init && \
-	cd /etc/default && sudo curl -o kibana https://gist.githubusercontent.com/thisismitch/8b15ac909aed214ad04a/raw/fc5025c3fc499ad8262aff34ba7fde8c87ead7c0/kibana-4.x-default && \
-	sudo chmod +x /etc/init.d/kibana && \
-	sudo update-rc.d kibana defaults 96 9 && \
-	sudo service kibana start && \
-	rmdir kibana-4* && \
+	rmdir kibana-4*/ && \
 	rm -f kibana-*.tar.gz
 
 # configure htop
@@ -41,12 +36,17 @@ ADD htoprc /root/.config/htop/htoprc
 
 # configure elasticsearch
 RUN update-rc.d elasticsearch defaults 95 10 && \
-	service elasticsearch start && \
-	/usr/share/elasticsearch/bin/plugin -install lmenezes/elasticsearch-kopf
+	service elasticsearch start
 
 # configure logstash
 ADD logstash.conf /etc/logstash/conf.d/logstash.conf
 RUN service logstash start
+
+# Configure Kibana
+ADD kibana.init /etc/init.d/kibana
+RUN sudo chmod +x /etc/init.d/kibana && \
+		update-rc.d kibana defaults 96 9 && \
+		sudo service kibana start
 
 # Expose ports needed
 EXPOSE 80
