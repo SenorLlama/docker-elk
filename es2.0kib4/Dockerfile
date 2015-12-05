@@ -35,6 +35,7 @@ RUN sudo groupadd -g 998 kibana && \
 ADD htoprc /root/.config/htop/htoprc
 
 # configure elasticsearch
+ADD elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 RUN update-rc.d elasticsearch defaults 95 10 && \
 	service elasticsearch start
 
@@ -49,9 +50,10 @@ RUN sudo chmod +x /etc/init.d/kibana && \
 		sudo service kibana start
 
 # Expose ports needed
-EXPOSE 80
+EXPOSE 5601
 EXPOSE 9200
 EXPOSE 9400
+EXPOSE 9401
 
 # setup entrypoint
 ADD docker-entrypoint.sh /docker-entrypoint.sh
