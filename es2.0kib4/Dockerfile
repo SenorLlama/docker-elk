@@ -36,18 +36,14 @@ ADD htoprc /root/.config/htop/htoprc
 
 # configure elasticsearch
 ADD elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
-RUN update-rc.d elasticsearch defaults 95 10 && \
-	service elasticsearch start
+RUN update-rc.d elasticsearch defaults 95 10
 
 # configure logstash
 ADD logstash.conf /etc/logstash/conf.d/logstash.conf
-RUN service logstash start
 
 # Configure Kibana
 ADD kibana.init /etc/init.d/kibana
-RUN sudo chmod +x /etc/init.d/kibana && \
-		update-rc.d kibana defaults 96 9 && \
-		sudo service kibana start
+RUN sudo chmod +x /etc/init.d/kibana && update-rc.d kibana defaults 96 9
 
 # Expose ports needed
 EXPOSE 5601
@@ -57,5 +53,5 @@ EXPOSE 9401
 
 # setup entrypoint
 ADD docker-entrypoint.sh /docker-entrypoint.sh
-RUN ["chmod", "+x", "/docker-entrypoint.sh"]
+RUN sudo chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
